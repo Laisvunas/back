@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const authRoutes = require("./routes/auth");
+const diagramRoutes = require("./routes/diagrams");
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/diagrams", diagramRoutes);
 
 app.all("*", (req, res) => {
     res.status(404).send({ error: "Page not found" });
