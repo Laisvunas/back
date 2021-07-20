@@ -7,7 +7,6 @@ const router = express.Router();
 const {mysqlConfig, jwtSecret} = require("../config");
 
 router.post("/all", async (req, res) => {
-    console.log("req.body: " + JSON.stringify(req.body));
     if (!req.body.author_id || !req.body.isEditor ) {
         return res.status(400).send({error: "Insufficient data provided"});
     }
