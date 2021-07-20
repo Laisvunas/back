@@ -6,6 +6,32 @@ const router = express.Router();
 
 const {mysqlConfig, jwtSecret} = require("../config");
 
+router.get("/status", async (req, res) => {
+    let userId = false;
+    let username = false;
+    const token = typeof req.headers.authorization != 'undefined' ? req.headers.authorization.split(" ")[1] : 'undefined';
+    //const token = req.headers.authorization?.split(" ")[1];
+    try {
+        const decodedToken = jwt.verify(token, jwtSecret);
+        req.userData = decodedToken;
+        userId = req.userData.id;
+        const con = await mysql.createConnection(mysqlConfig);
+        const [data] = await con.execute(`SELECT * FROM authors WHERE id = ${mysql.escape(userId)} LIMIT 1`);
+        con.end();
+
+        if (data.length !== 1) {
+            return res.status(400).send({username: "", id: "", isEditor: "n"});
+        }
+        else {
+            return res.send({username: data[0].username, id: data[0].id, isEditor: data[0].editor});
+        }
+    }
+    catch(e) {
+        console.log(e);
+        return res.send({username: "", id: "", isEditor: "n"});
+    }
+});
+
 router.post("/register", async (req, res) => {
     if (!req.body.username || !req.body.email || !req.body.password) {
         return res.status(400).send({error: "Insufficient data provided"});
@@ -41,7 +67,6 @@ router.post("/login", async(req, res) => {
         
 
         if (data.length !== 1) {
-            con.end();
             return res.status(400).send({error: "Email or password is incorrect"});
         }
         
@@ -59,7 +84,7 @@ router.post("/login", async(req, res) => {
             },
             jwtSecret,
             {
-                expiresIn: 60 * 60
+                expiresIn: 24 * 3600 * 365
             }
         );
 
