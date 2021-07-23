@@ -12,9 +12,12 @@ module.exports = {
             if (req.body.author_id === decodedToken.id) {
                 return next();
             }
+            else {
+                return res.status(400).send({ error: 'Unauthorized access to site.' });
+            }
             
         } catch (e) {
-            return res.status(400).send({ error: 'Unauthorized access to site' });
+            return res.status(400).send({ error: 'Unauthorized access to site.' });
         }
     },
 };
