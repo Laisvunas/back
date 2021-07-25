@@ -34,7 +34,7 @@ router.post("/all", async (req, res) => {
 });
 
 router.post("/publish", isLoggedIn, async (req, res) => {
-    if (!req.body.author_id || !req.body.editor || !req.body.title || !req.body.sentence || !req.body.code) {
+    if (!req.body.author_id || !req.body.editor || !req.body.title || !req.body.sentence || !req.body.code || !req.body.json) {
         return res.status(400).send({error: "Insufficient data provided"});
     }
 
@@ -46,7 +46,7 @@ router.post("/publish", isLoggedIn, async (req, res) => {
 
         // case Publish
         if (!req.body.id) {
-            sql = `INSERT INTO diagrams (user_id, title, sentence, code, commentary ${req.body.editor == 'y' ? ', editors_commentary' : ''}) VALUES (${mysql.escape(req.body.author_id)}, ${mysql.escape(req.body.title)}, ${mysql.escape(req.body.sentence)}, ${mysql.escape(req.body.code)}, ${mysql.escape(req.body.commentary)} ${req.body.editor == 'y' ? ', ' + mysql.escape(req.body.editors_commentary) : ''})`;
+            sql = `INSERT INTO diagrams (user_id, title, sentence, json, code, commentary ${req.body.editor == 'y' ? ', editors_commentary' : ''}) VALUES (${mysql.escape(req.body.author_id)}, ${mysql.escape(req.body.title)}, ${mysql.escape(req.body.sentence)}, ${mysql.escape(req.body.json)}, ${mysql.escape(req.body.code)}, ${mysql.escape(req.body.commentary)} ${req.body.editor == 'y' ? ', ' + mysql.escape(req.body.editors_commentary) : ''})`;
             [data] = await con.execute(sql);
             con.end();
             
@@ -68,7 +68,7 @@ router.post("/publish", isLoggedIn, async (req, res) => {
                 }
             }
             
-            sql = `UPDATE diagrams SET title = ${mysql.escape(req.body.title)}, sentence = ${mysql.escape(req.body.sentence)}, code = ${mysql.escape(req.body.code)}, commentary = ${mysql.escape(req.body.commentary)} ${req.body.editor == 'y' ? ', editors_commentary = ' + mysql.escape(req.body.editors_commentary) : ''} WHERE id = ${mysql.escape(req.body.id)}`;
+            sql = `UPDATE diagrams SET title = ${mysql.escape(req.body.title)}, sentence = ${mysql.escape(req.body.sentence)}, code = ${mysql.escape(req.body.code)}, json = ${mysql.escape(req.body.json)}, commentary = ${mysql.escape(req.body.commentary)} ${req.body.editor == 'y' ? ', editors_commentary = ' + mysql.escape(req.body.editors_commentary) : ''} WHERE id = ${mysql.escape(req.body.id)}`;
             [data] = await con.execute(sql);
             con.end();
 
@@ -89,7 +89,7 @@ router.post("/publish", isLoggedIn, async (req, res) => {
 router.post("/publish/:id", isLoggedIn, async (req, res) => {
     try {
         const con = await mysql.createConnection(mysqlConfig);
-        const sql = `SELECT diagrams.id, diagrams.user_id, diagrams.title, diagrams.sentence, diagrams.code, diagrams.commentary, diagrams.editors_commentary, diagrams.created, authors.username FROM diagrams INNER JOIN authors ON diagrams.user_id = authors.id WHERE diagrams.id = ${mysql.escape(req.params.id)}`;
+        const sql = `SELECT diagrams.id, diagrams.user_id, diagrams.title, diagrams.sentence, diagrams.json, diagrams.code, diagrams.commentary, diagrams.editors_commentary, diagrams.created, authors.username FROM diagrams INNER JOIN authors ON diagrams.user_id = authors.id WHERE diagrams.id = ${mysql.escape(req.params.id)}`;
         const [data] = await con.execute(sql);
         con.end();
 
